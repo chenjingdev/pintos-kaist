@@ -58,25 +58,25 @@ test_sleep (int thread_cnt, int iterations)
   /* 이 테스트는 MLFQS와 함께 작동하지 않습니다. */
   ASSERT (!thread_mlfqs);
 
-  msg ("Creating %d threads to sleep %d times each.", thread_cnt, iterations);
-  msg ("Thread 0 sleeps 10 ticks each time,");
-  msg ("thread 1 sleeps 20 ticks each time, and so on.");
-  msg ("If successful, product of iteration count and");
-  msg ("sleep duration will appear in nondescending order.");
+  msg ("%d개의 스레드를 생성하여 각각 %d번씩 잠들게 합니다.", thread_cnt, iterations);
+  msg ("스레드 0은 각각 10 틱씩 잠듭니다,");
+  msg ("스레드 1은 각각 20 틱씩 잠듭니다, 그리고 이어갑니다.");
+  msg ("성공하면 반복 횟수와 잠자는 시간의 곱이");
+  msg ("오름차순으로 나타날 것입니다.");
 
-  /* Allocate memory. */
+  /* 메모리 할당 */
   threads = malloc (sizeof *threads * thread_cnt);
   output = malloc (sizeof *output * iterations * thread_cnt * 2);
   if (threads == NULL || output == NULL)
-    PANIC ("couldn't allocate memory for test");
+    PANIC ("테스트를 위한 메모리를 할당할 수 없습니다");
 
-  /* Initialize test. */
+  /* 테스트를 초기화합니다. */
   test.start = timer_ticks () + 100;
   test.iterations = iterations;
   lock_init (&test.output_lock);
   test.output_pos = output;
 
-  /* Start threads. */
+  /* 스레드를 시작합니다. */
   ASSERT (output != NULL);
   for (i = 0; i < thread_cnt; i++)
     {
