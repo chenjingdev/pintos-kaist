@@ -1,6 +1,5 @@
-/* Creates N threads, each of which sleeps a different, fixed
-   duration, M times.  Records the wake-up order and verifies
-   that it is valid. */
+/* N개의 스레드를 생성하고, 각각 다른 고정된 시간 동안 M번 잠듦.
+  깨어나는 순서를 기록하고 유효한지 확인합니다. */
 
 #include <stdio.h>
 #include "tests/threads/tests.h"
@@ -24,29 +23,29 @@ test_alarm_multiple (void)
   test_sleep (5, 7);
 }
 
-/* Information about the test. */
+/* 테스트에 대한 정보 */
 struct sleep_test 
   {
-    int64_t start;              /* Current time at start of test. */
-    int iterations;             /* Number of iterations per thread. */
+    int64_t start;              /* 테스트 시작 시간 */
+    int iterations;             /* 각 스레드당 반복 횟수 */
 
-    /* Output. */
-    struct lock output_lock;    /* Lock protecting output buffer. */
-    int *output_pos;            /* Current position in output buffer. */
+    /* 출력 */
+    struct lock output_lock;    /* 출력 버퍼 보호를 위한 락 */
+    int *output_pos;            /* 출력 버퍼의 현재 위치 */
   };
 
-/* Information about an individual thread in the test. */
+/* 테스트의 개별 스레드에 대한 정보 */
 struct sleep_thread 
   {
-    struct sleep_test *test;     /* Info shared between all threads. */
-    int id;                     /* Sleeper ID. */
-    int duration;               /* Number of ticks to sleep. */
-    int iterations;             /* Iterations counted so far. */
+    struct sleep_test *test;     /* 모든 스레드 간에 공유되는 정보 */
+    int id;                     /* 슬리퍼 ID */
+    int duration;               /* 슬립할 틱 수 */
+    int iterations;             /* 현재까지 카운트된 반복 횟수 */
   };
 
 static void sleeper (void *);
 
-/* Runs THREAD_CNT threads thread sleep ITERATIONS times each. */
+/* THREAD_CNT 개의 스레드를 생성하고, 각각 ITERATIONS 번 잠듦. */
 static void
 test_sleep (int thread_cnt, int iterations) 
 {
@@ -56,7 +55,7 @@ test_sleep (int thread_cnt, int iterations)
   int product;
   int i;
 
-  /* This test does not work with the MLFQS. */
+  /* 이 테스트는 MLFQS와 함께 작동하지 않습니다. */
   ASSERT (!thread_mlfqs);
 
   msg ("Creating %d threads to sleep %d times each.", thread_cnt, iterations);
@@ -93,14 +92,13 @@ test_sleep (int thread_cnt, int iterations)
       thread_create (name, PRI_DEFAULT, sleeper, t);
     }
   
-  /* Wait long enough for all the threads to finish. */
+  /* 모든 스레드가 완료되기에 충분한 시간을 기다립니다. */
   timer_sleep (100 + thread_cnt * iterations * 10 + 100);
 
-  /* Acquire the output lock in case some rogue thread is still
-     running. */
+  /* 어떤 돌연변이 스레드가 아직 실행 중인 경우를 대비하여 출력 락을 획득합니다. */
   lock_acquire (&test.output_lock);
 
-  /* Print completion order. */
+  /* 완료 순서를 출력합니다. */
   product = 0;
   for (op = output; op < test.output_pos; op++) 
     {
@@ -122,7 +120,7 @@ test_sleep (int thread_cnt, int iterations)
               t->id, product, new_prod);
     }
 
-  /* Verify that we had the proper number of wakeups. */
+  /* 적절한 깨어남 횟수를 가졌는지 확인합니다. */
   for (i = 0; i < thread_cnt; i++)
     if (threads[i].iterations != iterations)
       fail ("thread %d woke up %d times instead of %d",
@@ -133,7 +131,7 @@ test_sleep (int thread_cnt, int iterations)
   free (threads);
 }
 
-/* Sleeper thread. */
+/* 슬리퍼 스레드. */
 static void
 sleeper (void *t_) 
 {
