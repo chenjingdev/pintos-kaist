@@ -144,7 +144,7 @@ putbuf (const char *buffer, size_t n) {
 /* C를 vga 디스플레이와 시리얼 포트에 기록합니다. */
 int
 putchar (int c) {
-	acqㅊuire_console ();
+	acquire_console ();
 	putchar_have_lock (c);
 	release_console ();
 
