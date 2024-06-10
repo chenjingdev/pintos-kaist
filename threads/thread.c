@@ -207,6 +207,14 @@ thread_create (const char *name, int priority,
 	/* 실행 큐에 추가합니다. */
 	thread_unblock (t);
 
+	/* 생성된 스레드의 우선순위가 현재 실행중인
+	   스레드의 우선순위 보다 높다면 현재 실행중인 스레드는 CPU를 양보한다.
+	   이때 thread_unblock에서 우선순위로 ready_list를 정렬한 상태이기 때문에
+	   다음 실행될 스레드는 우선 순위가 높은 새로 생성된 스레드가 실행되게 된다.*/
+	if (thread_current()->priority < priority) {
+		thread_yield();
+	}
+
 	return tid;
 }
 
@@ -239,7 +247,10 @@ thread_unblock (struct thread *t) {
 
 	old_level = intr_disable ();
 	ASSERT (t->status == THREAD_BLOCKED);
-	list_push_back (&ready_list, &t->elem);
+	
+	// 우선순위로 ready_list에 삽입
+	list_insert_ordered(&ready_list, &t->elem, cmp_priority, NULL);
+
 	t->status = THREAD_READY;
 	intr_set_level (old_level);
 }
@@ -302,7 +313,7 @@ thread_yield (void) {
 
 	old_level = intr_disable ();
 	if (curr != idle_thread)
-		list_push_back (&ready_list, &curr->elem);
+		list_insert_ordered(&ready_list, &curr->elem, cmp_priority, NULL);
 	do_schedule (THREAD_READY);
 	intr_set_level (old_level);
 }
@@ -311,6 +322,23 @@ thread_yield (void) {
 void
 thread_set_priority (int new_priority) {
 	thread_current ()->priority = new_priority;
+	/* 스레드의 우선순위가 변경되었을 때
+	우선순위에 따라 선점이 발생하도록 한다. */
+	test_max_priority();
+}
+
+void
+test_max_priority (void) {
+	/* read_list에서 우선순위가 가장 높은 스레드와 현재 스레드의
+	우선순위를 비교하여 스케줄링 한다.(ready_list 가 비여있지 않은지 확인)  */
+	if (!list_empty(&ready_list) && list_entry(list_front(&ready_list), struct thread, elem)->priority > thread_current()->priority) {
+		thread_yield();
+	}
+}
+
+bool
+cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) {
+	return list_entry(a, struct thread, elem)->priority > list_entry(b, struct thread, elem)->priority;
 }
 
 /* 현재 스레드의 우선 순위를 반환합니다. */
@@ -600,12 +628,5 @@ void thread_awake(int64_t ticks) {
         }
 
         e = next;  // 다음 요소로 이동
-    }
-}
-
-// 스레드를 출력하는 함수
-void print_thread(struct thread *t) {
-    if (t != NULL) {
-        printf("Thread Name: %s, Priority: %d, Wake Tick: %ld\n", t->name, t->priority, t->wake_tick);
     }
 }
