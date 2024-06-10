@@ -38,6 +38,8 @@ void cond_wait (struct condition *, struct lock *);
 void cond_signal (struct condition *, struct lock *);
 void cond_broadcast (struct condition *, struct lock *);
 
+bool cmp_sem_priority (const struct list_elem *a, const struct list_elem *b, void *aux);
+
 /* 최적화 방벽
  *
  * 컴파일러는 최적화 방벽을 가로질러 연산을 재정렬하지 않습니다.

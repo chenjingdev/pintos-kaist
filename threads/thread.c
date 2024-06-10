@@ -338,7 +338,9 @@ test_max_priority (void) {
 
 bool
 cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) {
-	return list_entry(a, struct thread, elem)->priority > list_entry(b, struct thread, elem)->priority;
+	struct thread *thread_a = list_entry(a, struct thread, elem);
+	struct thread *thread_b = list_entry(b, struct thread, elem);
+	return thread_a->priority > thread_b->priority;
 }
 
 /* 현재 스레드의 우선 순위를 반환합니다. */
