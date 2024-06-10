@@ -88,10 +88,14 @@ struct thread {
 	tid_t tid;                          /* 스레드 식별자 */
 	enum thread_status status;          /* 스레드 상태 */
 	char name[16];                      /* 이름 (디버깅 용도) */
+	uint8_t *stack; 				    /* 저장된 스택 포인터 */
 	int priority;                       /* 우선순위 */
+	struct list_elem allelem;           /* 모든 스레드 목록을 위한 리스트 요소 */
 
 	/* thread.c와 synch.c 사이에서 공유합니다. */
 	struct list_elem elem;              /* 리스트 요소 */
+	int64_t wake_tick;					/* 깨어날 시간 */
+
 
 #ifdef USERPROG
 	/* userprog/process.c에서 소유합니다. */
@@ -140,5 +144,9 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 void do_iret (struct intr_frame *tf);
+
+void thread_sleep (int64_t ticks);
+void thread_awake (int64_t ticks);
+void print_thread (struct thread *t);
 
 #endif /* threads/thread.h */

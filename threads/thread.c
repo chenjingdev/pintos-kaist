@@ -28,6 +28,10 @@
    즉 실행 준비가 되었지만 실제로 실행 중이지 않은 프로세스 목록. */
 static struct list ready_list;
 
+static struct list sleep_list;
+
+int64_t next_tick_to_awake = INT64_MAX;
+
 /* 유휴 스레드. */
 static struct thread *idle_thread;
 
@@ -105,6 +109,7 @@ thread_init (void) {
 	/* 글로벌 스레드 컨텍스트 초기화 */
 	lock_init (&tid_lock);
 	list_init (&ready_list);
+	list_init (&sleep_list);
 	list_init (&destruction_req);
 
 	/* 실행 중인 스레드를 위한 스레드 구조체 설정 */
@@ -567,4 +572,40 @@ allocate_tid (void) {
 	lock_release (&tid_lock);
 
 	return tid;
+}
+
+void thread_sleep(int64_t ticks) {
+	enum intr_level old_level = intr_disable();;
+	struct thread *t = thread_current();
+
+	if (t != idle_thread) {
+		t->wake_tick = ticks;
+		list_push_back(&sleep_list, &t->elem);
+		thread_block();
+	}
+
+	intr_set_level(old_level);
+};
+
+void thread_awake(int64_t ticks) {
+    struct list_elem *e = list_begin(&sleep_list);
+
+    while (e != list_end(&sleep_list)) {
+        struct thread *t = list_entry(e, struct thread, elem);
+        struct list_elem *next = list_next(e);  // 다음 요소 미리 저장
+
+        if (t->wake_tick <= ticks) {
+            list_remove(e);  // 요소를 리스트에서 제거
+            thread_unblock(t);  // 스레드 언블록
+        }
+
+        e = next;  // 다음 요소로 이동
+    }
+}
+
+// 스레드를 출력하는 함수
+void print_thread(struct thread *t) {
+    if (t != NULL) {
+        printf("Thread Name: %s, Priority: %d, Wake Tick: %ld\n", t->name, t->priority, t->wake_tick);
+    }
 }
