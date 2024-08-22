@@ -1,0 +1,22 @@
+Kernel command line: -q -f put bad-jump2 run bad-jump2
+0 ~ 9fc00 1
+100000 ~ 13e0000 1
+Pintos booting with: 
+	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
+	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
+Calibrating timer...  156,876,800 loops/s.
+hd0:0: detected 305 sector (152 kB) disk, model "QEMU HARDDISK", serial "QM00001"
+hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
+hd1:0: detected 103 sector (51 kB) disk, model "QEMU HARDDISK", serial "QM00003"
+Formatting file system...Kernel PANIC at ../../threads/thread.c:312 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x800421795e 0x80042071cf 0x80042072db 0x8004209ce6 0x8004213f25 0x8004208b04 0x8004208f22 0x800420743e.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 53 ticks
+Thread: 30 idle ticks, 23 kernel ticks, 0 user ticks
+hd0:0: 0 reads, 0 writes
+hd0:1: 0 reads, 0 writes
+hd1:0: 0 reads, 0 writes
+Console: 1029 characters output
+Key
